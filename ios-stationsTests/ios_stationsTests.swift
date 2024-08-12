@@ -117,7 +117,28 @@ class ios_stationsTests: XCTestCase {
         XCTAssertEqual(titleLabel.font, UIFont(name: "Arial-BoldMT", size: 18), "ボタンのフォントが適切に設定されていません")
     }
     
-    // MARK: station9は面談
+    func testStation9() throws {
+        let vc = try XCTUnwrap(loadInitialViewController(), "StoryboardのInitialViewControllerが設定されていません")
+        XCTAssertTrue(vc is FirstViewController, "FirstViewControllerがInitialViewControllerとして設定されていません")
+        
+        let button = try XCTUnwrap(vc.view.subviews.first(where: { $0 is UIButton }) as? UIButton, "ボタンが作成されていません")
+        
+        guard let actions = button.actions(forTarget: vc, forControlEvent: .touchUpInside) else {
+            XCTFail("UIButtonのtouchUpInsideイベントにメソッドが関連付けされていません")
+            return
+        }
+        XCTAssertTrue(actions.count > 0, "ボタンにtouchUpInsideのイベントにactionが登録されていません")
+        
+        var buttonColor = button.backgroundColor
+        var butonColorChanged = button.backgroundColor
+        [0...10].forEach { _ in
+            button.tap()
+            butonColorChanged = button.backgroundColor
+            XCTAssertNotEqual(butonColorChanged, buttonColor, "ボタンの色は変わる")
+            buttonColor = butonColorChanged
+        }
+        XCTAssertEqual(button.titleLabel?.font.fontName, "HelveticaNeue-Light", "ボタンのfontがHelvetica NeueのLightに指定されていない")
+    }
     
     func testStation10() throws {
         let window = UIWindow()
@@ -315,7 +336,33 @@ class ios_stationsTests: XCTestCase {
         XCTAssertEqual(webView.url?.absoluteString, "https://www.amazon.co.jp/dp/B08FZX8PYW/ref=cm_sw_em_r_mt_dp_7NDC2QCY40JYYR6RE3KJ", "SecondViewControllerのurlに適切な値が設定されていません")
     }
     
-    // MARK: station17は面談
+    func testStation17() throws {
+        let window = UIWindow()
+        let vc = try XCTUnwrap(loadInitialViewController(in: window) as? FirstViewController, "StoryboardのInitialViewControllerが設定されていません")
+        
+        let button = try XCTUnwrap(vc.view.subviews.first(where: { $0 is UIButton }) as? UIButton, "ボタンが作成されていません")
+        
+        guard let actions = button.actions(forTarget: vc, forControlEvent: .touchUpInside) else {
+            XCTFail("UIButtonのtouchUpInsideイベントにメソッドが関連付けされていません")
+            return
+        }
+        XCTAssertTrue(actions.contains(where: {$0.contains("fetchBooks")}), "UIButtonにfetchBooksという名前のメソッドが関連付けされていません")
+        let tableView = try XCTUnwrap(vc.view.subviews.first(where: { $0 is UITableView }) as? UITableView, "UITableViewが作成されていません")
+        guard let refreshControl = tableView.refreshControl else {
+            XCTFail("UITableViewにrefreshControlが設定されていない.")
+            return
+        }
+        vc.books = nil
+        refreshControl.sendActions(for: .valueChanged)
+        
+        let expectation = self.expectation(description: "mock request")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(30)) {
+            XCTAssertFalse(vc.books?.isEmpty ?? true, "bookは更新されていません")
+            expectation.fulfill()
+        }
+        waitForExpectations(timeout: 60)
+        
+    }
 }
 
 extension XCTestCase {
