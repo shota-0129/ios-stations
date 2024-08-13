@@ -130,12 +130,12 @@ class ios_stationsTests: XCTestCase {
         XCTAssertTrue(actions.count > 0, "ボタンにtouchUpInsideのイベントにactionが登録されていません")
         
         var buttonColor = button.backgroundColor
-        var butonColorChanged = button.backgroundColor
+        var buttonColorChanged = button.backgroundColor
         [0...10].forEach { _ in
             button.tap()
-            butonColorChanged = button.backgroundColor
-            XCTAssertNotEqual(butonColorChanged, buttonColor, "ボタンの色は変わる")
-            buttonColor = butonColorChanged
+            buttonColorChanged = button.backgroundColor
+            XCTAssertNotEqual(buttonColorChanged, buttonColor, "ボタンの色は変わっていません")
+            buttonColor = buttonColorChanged
         }
         XCTAssertEqual(button.titleLabel?.font.fontName, "HelveticaNeue-Light", "ボタンのfontがHelvetica NeueのLightに指定されていない")
     }
