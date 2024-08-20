@@ -129,14 +129,29 @@ class ios_stationsTests: XCTestCase {
         }
         XCTAssertTrue(actions.count > 0, "ボタンにtouchUpInsideのイベントにactionが登録されていません")
         
-        var buttonColor = button.backgroundColor
-        var buttonColorChanged = button.backgroundColor
-        [0...10].forEach { _ in
-            button.tap()
-            buttonColorChanged = button.backgroundColor
-            XCTAssertNotEqual(buttonColorChanged, buttonColor, "ボタンの色は変わっていません")
-            buttonColor = buttonColorChanged
+        let ramdomColor = UIColor.random
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        if ramdomColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            XCTAssertFalse(green == 1 && blue == 1 && alpha == 1, "UIColorのrandomでRGBともにramdomする実装がされていません")
+            XCTAssertFalse(green == red || blue == red, "UIColorのrandomでRGBそれぞれ独立したramdomの実装がされていません")
+        } else {
+            XCTAssert(true, "色取得失敗")
         }
+        var buttonColorBefore = button.backgroundColor
+        var colorChangedCount = 0
+        for _ in 0...3 {
+            button.tap()
+            if buttonColorBefore != button.backgroundColor {
+                colorChangedCount += 1
+            }
+            buttonColorBefore = button.backgroundColor
+        }
+        XCTAssertTrue(colorChangedCount > 1, "ボタン押したことで色変わっていません")
+        
         XCTAssertEqual(button.titleLabel?.font.fontName, "HelveticaNeue-Light", "ボタンのfontがHelvetica NeueのLightに指定されていない")
     }
     
@@ -352,13 +367,21 @@ class ios_stationsTests: XCTestCase {
             XCTFail("UITableViewにrefreshControlが設定されていない.")
             return
         }
-        vc.books = nil
-        refreshControl.sendActions(for: .valueChanged)
-        
+        vc.books = []
+        button.tap()
         let expectation = self.expectation(description: "mock request")
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(30)) {
-            XCTAssertFalse(vc.books?.isEmpty ?? true, "bookは更新されていません")
-            expectation.fulfill()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15)) {
+            XCTAssertTrue(vc.books?.count == 10, "bookは読み込まれていません")
+            button.tap()
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15)) {
+                XCTAssertTrue(vc.books?.count == 20, "bookのデータは追加されていません")
+                refreshControl.sendActions(for: .valueChanged)
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15)) {
+                    XCTAssertTrue(vc.books?.count == 10, "pullrefreshでbookが最初のデータにリセットされていません")
+                    expectation.fulfill()
+                }
+            }
         }
         waitForExpectations(timeout: 60)
         
