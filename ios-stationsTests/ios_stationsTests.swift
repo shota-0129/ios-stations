@@ -129,15 +129,15 @@ class ios_stationsTests: XCTestCase {
         }
         XCTAssertTrue(actions.count > 0, "ボタンにtouchUpInsideのイベントにactionが登録されていません")
         
-        let ramdomColor = UIColor.random
+        let randomColor = UIColor.random
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
 
-        if ramdomColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
-            XCTAssertFalse(green == 1 && blue == 1 && alpha == 1, "UIColorのrandomでRGBともにramdomする実装がされていません")
-            XCTAssertFalse(green == red || blue == red, "UIColorのrandomでRGBそれぞれ独立したramdomの実装がされていません")
+        if randomColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            XCTAssertFalse(green == 1 && blue == 1 && alpha == 1, "UIColorのrandomでRGBともにrandomする実装がされていません")
+            XCTAssertFalse(green == red || blue == red, "UIColorのrandomでRGBそれぞれ独立したrandomの実装がされていません")
         } else {
             XCTAssert(true, "色取得失敗")
         }
