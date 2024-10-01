@@ -117,7 +117,43 @@ class ios_stationsTests: XCTestCase {
         XCTAssertEqual(titleLabel.font, UIFont(name: "Arial-BoldMT", size: 18), "ボタンのフォントが適切に設定されていません")
     }
     
-    // MARK: station9は面談
+    func testStation9() throws {
+        let vc = try XCTUnwrap(loadInitialViewController(), "StoryboardのInitialViewControllerが設定されていません")
+        XCTAssertTrue(vc is FirstViewController, "FirstViewControllerがInitialViewControllerとして設定されていません")
+        
+        let button = try XCTUnwrap(vc.view.subviews.first(where: { $0 is UIButton }) as? UIButton, "ボタンが作成されていません")
+        
+        guard let actions = button.actions(forTarget: vc, forControlEvent: .touchUpInside) else {
+            XCTFail("UIButtonのtouchUpInsideイベントにメソッドが関連付けされていません")
+            return
+        }
+        XCTAssertTrue(actions.count > 0, "ボタンにtouchUpInsideのイベントにactionが登録されていません")
+        
+        let randomColor = UIColor.random
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        if randomColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            XCTAssertFalse(green == 1 && blue == 1 && alpha == 1, "UIColorのrandomでRGBともにrandomする実装がされていません")
+            XCTAssertFalse(green == red || blue == red, "UIColorのrandomでRGBそれぞれ独立したrandomの実装がされていません")
+        } else {
+            XCTAssert(true, "色取得失敗")
+        }
+        var buttonColorBefore = button.backgroundColor
+        var colorChangedCount = 0
+        for _ in 0...3 {
+            button.tap()
+            if buttonColorBefore != button.backgroundColor {
+                colorChangedCount += 1
+            }
+            buttonColorBefore = button.backgroundColor
+        }
+        XCTAssertTrue(colorChangedCount > 1, "ボタン押したことで色変わっていません")
+        
+        XCTAssertEqual(button.titleLabel?.font.fontName, "HelveticaNeue-Light", "ボタンのfontがHelvetica NeueのLightに指定されていない")
+    }
     
     func testStation10() throws {
         let window = UIWindow()
@@ -315,7 +351,41 @@ class ios_stationsTests: XCTestCase {
         XCTAssertEqual(webView.url?.absoluteString, "https://www.amazon.co.jp/dp/B08FZX8PYW/ref=cm_sw_em_r_mt_dp_7NDC2QCY40JYYR6RE3KJ", "SecondViewControllerのurlに適切な値が設定されていません")
     }
     
-    // MARK: station17は面談
+    func testStation17() throws {
+        let window = UIWindow()
+        let vc = try XCTUnwrap(loadInitialViewController(in: window) as? FirstViewController, "StoryboardのInitialViewControllerが設定されていません")
+        
+        let button = try XCTUnwrap(vc.view.subviews.first(where: { $0 is UIButton }) as? UIButton, "ボタンが作成されていません")
+        
+        guard let actions = button.actions(forTarget: vc, forControlEvent: .touchUpInside) else {
+            XCTFail("UIButtonのtouchUpInsideイベントにメソッドが関連付けされていません")
+            return
+        }
+        XCTAssertTrue(actions.contains(where: {$0.contains("fetchBooks")}), "UIButtonにfetchBooksという名前のメソッドが関連付けされていません")
+        let tableView = try XCTUnwrap(vc.view.subviews.first(where: { $0 is UITableView }) as? UITableView, "UITableViewが作成されていません")
+        guard let refreshControl = tableView.refreshControl else {
+            XCTFail("UITableViewにrefreshControlが設定されていない.")
+            return
+        }
+        vc.books = []
+        button.tap()
+        let expectation = self.expectation(description: "mock request")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15)) {
+            XCTAssertTrue(vc.books?.count == 10, "bookは読み込まれていません")
+            button.tap()
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15)) {
+                XCTAssertTrue(vc.books?.count == 20, "bookのデータは追加されていません")
+                refreshControl.sendActions(for: .valueChanged)
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(15)) {
+                    XCTAssertTrue(vc.books?.count == 10, "pullrefreshでbookが最初のデータにリセットされていません")
+                    expectation.fulfill()
+                }
+            }
+        }
+        waitForExpectations(timeout: 60)
+        
+    }
 }
 
 extension XCTestCase {
