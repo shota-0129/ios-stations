@@ -32,8 +32,8 @@ class ios_stationsTests: XCTestCase {
         let data = try XCTUnwrap(try? Data(contentsOf: url), "station3.pngがios-stations/testResourcesフォルダ内に作成されていません")
         let image = UIImage(data: data)
         
-        XCTAssertEqual(image?.cgImage?.width, 1170, "station3.pngが指定したサイズと異なっています")
-        XCTAssertEqual(image?.cgImage?.height, 2532, "station3.pngが指定したサイズと異なっています")
+        XCTAssertEqual(image?.cgImage?.width, 1179, "station3.pngが指定したサイズと異なっています、お使いのsimulator端末がiPhone15 proになっていない可能性が高いです。")
+        XCTAssertEqual(image?.cgImage?.height, 2556, "station3.pngが指定したサイズと異なっています、お使いのsimulator端末がiPhone15 proになっていない可能性が高いです。")
     }
     
     func testStation4() throws {
