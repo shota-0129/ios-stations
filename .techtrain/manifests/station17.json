@@ -4,7 +4,11 @@
     "prepare": [],
     "tests": [
         {
-            "type": "interview"
+            "type": "junit-compat",
+            "command": ".techtrain/manifests/station_test.sh",
+            "args": [
+                17
+            ]
         }
     ]
 }
