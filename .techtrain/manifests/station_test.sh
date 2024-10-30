@@ -5,7 +5,14 @@ clear () {
     rm station_result.xml
 }
 
-set -o pipefail && xcodebuild -project ios-stations.xcodeproj -scheme ios-stations -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15 Pro" "-only-testing:ios-stationsTests/ios_stationsTests/testStation$1" test &> log.log
+DEVICE_NAME=$(xcrun simctl list devices | grep 'iPhone' | grep -v 'iPhone SE' | sed -E 's/^ *([^()]+) \(([A-F0-9-]+)\) \(.*$/\1 \2/' | sort -k2 -r | head -n 1 | awk '{print $NF}')
+
+if [ -z "$DEVICE_NAME" ]; then
+  echo "Error: No Booted iOS Simulator device found."
+  exit 1
+fi
+
+set -o pipefail && xcodebuild -project ios-stations.xcodeproj -scheme ios-stations -sdk iphonesimulator -destination "platform=iOS Simulator,id=$DEVICE_NAME" "-only-testing:ios-stationsTests/ios_stationsTests/testStation$1" test &> log.log
 buildStatus=${PIPESTATUS[0]}
 
 cat log.log | xcpretty --report junit --output station_result.xml > /dev/null 2>&1
