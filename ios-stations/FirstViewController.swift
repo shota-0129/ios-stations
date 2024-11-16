@@ -11,7 +11,7 @@ class FirstViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // `Main` カラーをビューの背景色に設定
-        self.view.backgroundColor = UIColor.Theme.main
+//        self.view.backgroundColor = UIColor.Theme.main
     }
 
 }
