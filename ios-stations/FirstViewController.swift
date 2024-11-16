@@ -10,7 +10,8 @@ class FirstViewController: UIViewController {
     var books: [Book]?
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        // `Main` カラーをビューの背景色に設定
+        self.view.backgroundColor = UIColor.Theme.main
     }
 
 }
